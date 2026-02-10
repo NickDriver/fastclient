@@ -35,7 +35,11 @@ ob_start();
                     placeholder="Search customers..."
                     value="<?= e($search) ?>"
                     class="form-input"
+                    hx-get="/customers"
+                    hx-target="#customer-list"
                     hx-trigger="keyup changed delay:300ms"
+                    hx-push-url="true"
+                    hx-include="[name='status']"
                 >
             </div>
             <div class="sm:w-48">

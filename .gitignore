@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment
+.env
+
+# Built assets
+public/assets/css/*
+public/assets/js/*
+!public/assets/css/.gitkeep
+!public/assets/js/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

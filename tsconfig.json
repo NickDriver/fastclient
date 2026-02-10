@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./public/assets/js",
+    "rootDir": "./resources/ts",
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": ["resources/ts/**/*"],
+  "exclude": ["node_modules"]
+}

@@ -108,7 +108,7 @@ function sortIcon(string $column, string $currentSort, string $currentDirection)
                         hx-get="/customers/<?= $customer->id ?>"
                         hx-push-url="true"
                         hx-target="body"
-                        preload="mousedown">
+                        preload="mouseover">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center gap-2">
                                 <div class="font-medium text-gray-900 dark:text-warm-100"><?= e($customer->name) ?></div>
@@ -153,7 +153,7 @@ function sortIcon(string $column, string $currentSort, string $currentDirection)
                hx-get="/customers/<?= $customer->id ?>"
                hx-push-url="true"
                hx-target="body"
-               preload="mousedown"
+               preload="mouseover"
                class="card p-4 block <?= $customer->needsReview ? 'border-yellow-300 dark:border-yellow-700' : '' ?>">
                 <div class="flex items-start justify-between">
                     <div>

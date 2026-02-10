@@ -189,7 +189,7 @@ function sortIcon(string $column, string $currentSort, string $currentDirection)
 
     <!-- Pagination -->
     <?php if ($pagination['totalPages'] > 1): ?>
-        <nav class="flex items-center justify-between px-4 py-3 bg-white dark:bg-warm-800 border border-gray-200 dark:border-warm-700 rounded-lg sm:px-6">
+        <nav class="mt-4 flex items-center justify-between px-4 py-3 bg-white dark:bg-warm-800 border border-gray-200 dark:border-warm-700 rounded-lg sm:px-6">
             <div class="hidden sm:block">
                 <p class="text-sm text-gray-700 dark:text-warm-300">
                     Showing <span class="font-medium"><?= (($pagination['page'] - 1) * $pagination['perPage']) + 1 ?></span>

@@ -4,10 +4,10 @@
   "description": "Mini CRM system with PHP, HTMX, and Tailwind CSS",
   "scripts": {
     "dev": "bun run dev.ts",
-    "build:css": "bunx @tailwindcss/cli -i resources/css/app.css -o public/assets/css/app.css",
+    "build:css": "bun x @tailwindcss/cli -i resources/css/app.css -o public/assets/css/app.css",
     "build:js": "bun build resources/ts/app.ts --outdir public/assets/js --minify",
     "build": "bun run build:css && bun run build:js",
-    "watch:css": "bunx @tailwindcss/cli -i resources/css/app.css -o public/assets/css/app.css --watch"
+    "watch:css": "bun x @tailwindcss/cli -i resources/css/app.css -o public/assets/css/app.css --watch"
   },
   "dependencies": {
     "htmx.org": "^2.0.4"

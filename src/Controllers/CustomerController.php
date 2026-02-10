@@ -45,6 +45,8 @@ class CustomerController
             'search' => $search,
             'sort' => $sort,
             'direction' => $direction,
+            'statusCounts' => Customer::countByStatus(),
+            'totalCustomers' => Customer::totalCount(),
         ]);
     }
 

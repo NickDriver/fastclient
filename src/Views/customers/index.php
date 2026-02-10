@@ -33,6 +33,9 @@ ob_start();
         </div>
     </div>
 
+    <!-- Status cards -->
+    <?php require __DIR__ . '/partials/status-cards.php'; ?>
+
     <!-- Filters -->
     <div class="card p-4">
         <form

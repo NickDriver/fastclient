@@ -54,6 +54,14 @@
     @apply bg-white rounded-xl shadow-sm border border-gray-100 dark:bg-warm-800 dark:border-warm-700;
   }
 
+  .card-status {
+    @apply transition-all duration-200 ease-in-out cursor-pointer;
+  }
+
+  .card-status:hover {
+    @apply shadow-lg scale-105 -translate-y-1;
+  }
+
   .sidebar-link {
     @apply flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors duration-200 dark:text-warm-300 dark:hover:bg-warm-700 dark:hover:text-warm-100;
   }

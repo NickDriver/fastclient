@@ -199,35 +199,54 @@ install_php() {
 # ----------------------------------------------------------------------------
 # Step 2: Install Bun
 # ----------------------------------------------------------------------------
+find_bun() {
+    # Check common bun locations
+    local locations=(
+        "/usr/local/bin/bun"
+        "$HOME/.bun/bin/bun"
+        "/root/.bun/bin/bun"
+    )
+
+    for loc in "${locations[@]}"; do
+        if [ -x "$loc" ]; then
+            echo "$loc"
+            return 0
+        fi
+    done
+
+    # Check if in PATH
+    if command -v bun >/dev/null 2>&1; then
+        command -v bun
+        return 0
+    fi
+
+    return 1
+}
+
 install_bun() {
     print_step 2 "Installing Bun..."
 
-    # Always ensure bun is in PATH (needed for both fresh install and existing)
-    export BUN_INSTALL="$HOME/.bun"
-    export PATH="$BUN_INSTALL/bin:$PATH"
+    BUN_BIN=$(find_bun) || BUN_BIN=""
 
-    if check_command bun; then
+    if [ -n "$BUN_BIN" ]; then
         local bun_version
-        bun_version=$(bun --version)
-        print_success "Bun $bun_version is already installed"
+        bun_version=$("$BUN_BIN" --version)
+        print_success "Bun $bun_version found at $BUN_BIN"
     else
         print_info "Downloading Bun installer..."
+        export BUN_INSTALL="/usr/local"
         curl -fsSL https://bun.sh/install | bash >/dev/null 2>&1
 
-        # Also add to root's profile for future sessions
-        if ! grep -q "BUN_INSTALL" ~/.bashrc 2>/dev/null; then
-            echo 'export BUN_INSTALL="$HOME/.bun"' >> ~/.bashrc
-            echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> ~/.bashrc
-        fi
+        BUN_BIN=$(find_bun) || BUN_BIN=""
 
-        if ! check_command bun; then
+        if [ -z "$BUN_BIN" ]; then
             print_error "Bun installation failed"
             exit 1
         fi
 
         local bun_version
-        bun_version=$(bun --version)
-        print_success "Bun $bun_version installed successfully"
+        bun_version=$("$BUN_BIN" --version)
+        print_success "Bun $bun_version installed to $BUN_BIN"
     fi
 }
 
@@ -460,14 +479,14 @@ install_dependencies() {
     cd "$INSTALL_PATH"
 
     print_info "Running bun install..."
-    if ! bun install; then
+    if ! "$BUN_BIN" install; then
         print_error "Failed to install dependencies"
         exit 1
     fi
     print_success "Dependencies installed"
 
     print_info "Building assets (this may take a moment)..."
-    if ! bun run build; then
+    if ! "$BUN_BIN" run build; then
         print_error "Failed to build assets"
         exit 1
     fi

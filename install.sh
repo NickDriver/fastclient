@@ -264,12 +264,33 @@ configure_postgresql() {
     fi
 
     echo ""
-    # Prompt for database credentials
+    echo -e "  ${BOLD}Database Connection Method:${NC}"
+    echo "  1) Local Unix socket (peer auth, no password needed)"
+    echo "  2) TCP with password"
+    echo ""
+    local auth_choice
+    read -rp "  Select [1]: " auth_choice
+    auth_choice=${auth_choice:-1}
+
+    if [ "$auth_choice" = "1" ]; then
+        USE_SOCKET=true
+        DB_HOST=""
+        DB_PORT=""
+        DB_PASSWORD=""
+        print_info "Using Unix socket connection (peer authentication)"
+    else
+        USE_SOCKET=false
+        DB_HOST="localhost"
+        DB_PORT="5432"
+        print_info "Using TCP connection with password"
+    fi
+
+    echo ""
     DB_USERNAME=$(ask_input "Database username" "fastclient")
-    DB_PASSWORD=$(ask_password "Database password")
+    if [ "$USE_SOCKET" = false ]; then
+        DB_PASSWORD=$(ask_password "Database password")
+    fi
     DB_DATABASE=$(ask_input "Database name" "fastclient")
-    DB_HOST="localhost"
-    DB_PORT="5432"
     echo ""
 
     # Test connection
@@ -282,7 +303,11 @@ configure_postgresql() {
     if [ "$user_exists" != "1" ]; then
         print_warning "User '$DB_USERNAME' does not exist"
         if confirm "Create user '$DB_USERNAME'?"; then
-            sudo -u postgres psql -c "CREATE USER $DB_USERNAME WITH PASSWORD '$DB_PASSWORD';" >/dev/null 2>&1
+            if [ "$USE_SOCKET" = true ]; then
+                sudo -u postgres psql -c "CREATE USER $DB_USERNAME;" >/dev/null 2>&1
+            else
+                sudo -u postgres psql -c "CREATE USER $DB_USERNAME WITH PASSWORD '$DB_PASSWORD';" >/dev/null 2>&1
+            fi
             print_success "User '$DB_USERNAME' created"
         else
             print_error "Database user is required"
@@ -313,13 +338,30 @@ configure_postgresql() {
     sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $DB_DATABASE TO $DB_USERNAME;" >/dev/null 2>&1
     print_success "Privileges granted"
 
-    # Test actual connection with credentials
-    if PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USERNAME" -d "$DB_DATABASE" -c "SELECT 1;" >/dev/null 2>&1; then
-        print_success "Connection successful"
+    # Test actual connection
+    if [ "$USE_SOCKET" = true ]; then
+        # Test via Unix socket (peer auth)
+        if sudo -u "$DB_USERNAME" psql -d "$DB_DATABASE" -c "SELECT 1;" >/dev/null 2>&1; then
+            print_success "Connection successful (peer auth)"
+        else
+            # Try via postgres user as fallback test
+            if sudo -u postgres psql -d "$DB_DATABASE" -c "SELECT 1;" >/dev/null 2>&1; then
+                print_success "Database accessible"
+                print_warning "Peer auth may require matching Linux user '$DB_USERNAME'"
+            else
+                print_error "Failed to connect to database"
+                exit 1
+            fi
+        fi
     else
-        print_error "Failed to connect with provided credentials"
-        print_info "Make sure pg_hba.conf allows password authentication for local connections"
-        exit 1
+        # Test via TCP with password
+        if PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USERNAME" -d "$DB_DATABASE" -c "SELECT 1;" >/dev/null 2>&1; then
+            print_success "Connection successful"
+        else
+            print_error "Failed to connect with provided credentials"
+            print_info "Make sure pg_hba.conf allows password authentication for local connections"
+            exit 1
+        fi
     fi
 }
 

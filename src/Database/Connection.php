@@ -16,13 +16,16 @@ class Connection
         if (self::$instance === null) {
             $config = require __DIR__ . '/../../config/database.php';
 
-            $dsn = sprintf(
-                '%s:host=%s;port=%s;dbname=%s',
-                $config['driver'],
-                $config['host'],
-                $config['port'],
-                $config['database']
-            );
+            // Build DSN - omit host/port for Unix socket connections
+            $dsnParts = [];
+            if (!empty($config['host'])) {
+                $dsnParts[] = 'host=' . $config['host'];
+            }
+            if (!empty($config['port'])) {
+                $dsnParts[] = 'port=' . $config['port'];
+            }
+            $dsnParts[] = 'dbname=' . $config['database'];
+            $dsn = $config['driver'] . ':' . implode(';', $dsnParts);
 
             try {
                 self::$instance = new PDO(

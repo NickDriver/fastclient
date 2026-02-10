@@ -371,16 +371,7 @@ configure_postgresql() {
 configure_application() {
     print_step 4 "Configuring Application..."
 
-    echo ""
-    DOMAIN=$(ask_input "Domain name (e.g., crm.example.com)")
-    echo ""
-
-    if [ -z "$DOMAIN" ]; then
-        print_error "Domain name is required"
-        exit 1
-    fi
-
-    # Copy project files to install path
+    # Copy project files to install path first
     if [ "$SCRIPT_DIR" != "$INSTALL_PATH" ]; then
         print_info "Copying project to $INSTALL_PATH..."
 
@@ -402,11 +393,47 @@ configure_application() {
         print_info "Installing in current directory"
     fi
 
+    # Prompt for application settings
+    echo ""
+    echo -e "  ${BOLD}Application Configuration:${NC}"
+    echo ""
+    APP_NAME=$(ask_input "Application name" "FastClient")
+    DOMAIN=$(ask_input "Domain name (e.g., crm.example.com)")
+    echo ""
+
+    if [ -z "$DOMAIN" ]; then
+        print_error "Domain name is required"
+        exit 1
+    fi
+
+    # Show configuration summary
+    echo ""
+    echo -e "  ${BOLD}Configuration Summary:${NC}"
+    echo -e "  ─────────────────────────────────────"
+    echo -e "  APP_NAME:     ${GREEN}$APP_NAME${NC}"
+    echo -e "  APP_ENV:      ${GREEN}production${NC}"
+    echo -e "  APP_DEBUG:    ${GREEN}false${NC}"
+    echo -e "  APP_URL:      ${GREEN}https://$DOMAIN${NC}"
+    echo -e "  ─────────────────────────────────────"
+    echo -e "  DB_HOST:      ${GREEN}${DB_HOST:-<socket>}${NC}"
+    echo -e "  DB_PORT:      ${GREEN}${DB_PORT:-<socket>}${NC}"
+    echo -e "  DB_DATABASE:  ${GREEN}$DB_DATABASE${NC}"
+    echo -e "  DB_USERNAME:  ${GREEN}$DB_USERNAME${NC}"
+    echo -e "  DB_PASSWORD:  ${GREEN}${DB_PASSWORD:+********}${DB_PASSWORD:-<none>}${NC}"
+    echo -e "  ─────────────────────────────────────"
+    echo ""
+
+    if ! confirm "Proceed with this configuration?"; then
+        print_error "Installation cancelled by user"
+        exit 1
+    fi
+
     # Create .env from .env.example
     print_info "Creating .env configuration..."
     cp "$INSTALL_PATH/.env.example" "$INSTALL_PATH/.env"
 
     # Update .env values
+    sed -i "s|^APP_NAME=.*|APP_NAME=$APP_NAME|" "$INSTALL_PATH/.env"
     sed -i "s|^APP_ENV=.*|APP_ENV=production|" "$INSTALL_PATH/.env"
     sed -i "s|^APP_DEBUG=.*|APP_DEBUG=false|" "$INSTALL_PATH/.env"
     sed -i "s|^APP_URL=.*|APP_URL=https://$DOMAIN|" "$INSTALL_PATH/.env"

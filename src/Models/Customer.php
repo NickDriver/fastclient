@@ -119,7 +119,7 @@ class Customer
             'state' => $data['state'],
             'industry' => $data['industry'] ?? null,
             'status' => $data['status'] ?? self::STATUS_NEW,
-            'needs_review' => $data['needs_review'] ?? false,
+            'needs_review' => !empty($data['needs_review']) ? 1 : 0,
             'review_reason' => $data['review_reason'] ?? null,
         ]);
 

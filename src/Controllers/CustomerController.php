@@ -212,7 +212,7 @@ class CustomerController
         $headers = array_map(fn($h) => strtolower(trim($h)), $headers);
 
         // Required columns
-        $requiredColumns = ['name', 'email', 'phone', 'city', 'state'];
+        $requiredColumns = ['name', 'phone', 'city', 'state'];
         $missingColumns = array_diff($requiredColumns, $headers);
 
         if (!empty($missingColumns)) {
@@ -244,9 +244,7 @@ class CustomerController
             if (empty($data['name'])) {
                 $rowErrors[] = 'name is required';
             }
-            if (empty($data['email'])) {
-                $rowErrors[] = 'email is required';
-            } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
                 $rowErrors[] = 'invalid email format';
             }
             if (empty($data['phone'])) {
@@ -265,7 +263,7 @@ class CustomerController
             }
 
             // Check for duplicate email
-            $existingCustomer = Customer::findByEmail($data['email']);
+            $existingCustomer = !empty($data['email']) ? Customer::findByEmail($data['email']) : null;
             $needsReview = false;
             $reviewReason = null;
 

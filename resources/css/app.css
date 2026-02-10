@@ -43,7 +43,7 @@
   }
 
   .form-input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-warm-800 dark:border-warm-600 dark:text-warm-100 dark:placeholder-warm-400;
+    @apply w-full h-[42px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-warm-800 dark:border-warm-600 dark:text-warm-100 dark:placeholder-warm-400;
   }
 
   .form-label {

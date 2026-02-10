@@ -83,6 +83,9 @@ class CustomerController
             return view('errors.404');
         }
 
+        // Cache for 60 seconds to enable HTMX preload
+        header('Cache-Control: private, max-age=60');
+
         return view('customers.show', ['customer' => $customer]);
     }
 

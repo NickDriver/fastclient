@@ -104,7 +104,11 @@ function sortIcon(string $column, string $currentSort, string $currentDirection)
             </thead>
             <tbody class="bg-white dark:bg-warm-800 divide-y divide-gray-200 dark:divide-warm-700">
                 <?php foreach ($customers as $customer): ?>
-                    <tr class="hover:bg-gray-50 dark:hover:bg-warm-700 cursor-pointer <?= $customer->needsReview ? 'bg-yellow-50 dark:bg-yellow-900/10' : '' ?>" onclick="window.location.href='/customers/<?= $customer->id ?>'">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-warm-700 cursor-pointer <?= $customer->needsReview ? 'bg-yellow-50 dark:bg-yellow-900/10' : '' ?>"
+                        hx-get="/customers/<?= $customer->id ?>"
+                        hx-push-url="true"
+                        hx-target="body"
+                        preload="mousedown">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center gap-2">
                                 <div class="font-medium text-gray-900 dark:text-warm-100"><?= e($customer->name) ?></div>
@@ -145,7 +149,12 @@ function sortIcon(string $column, string $currentSort, string $currentDirection)
     <!-- Mobile card view -->
     <div class="md:hidden space-y-4">
         <?php foreach ($customers as $customer): ?>
-            <a href="/customers/<?= $customer->id ?>" class="card p-4 block <?= $customer->needsReview ? 'border-yellow-300 dark:border-yellow-700' : '' ?>">
+            <a href="/customers/<?= $customer->id ?>"
+               hx-get="/customers/<?= $customer->id ?>"
+               hx-push-url="true"
+               hx-target="body"
+               preload="mousedown"
+               class="card p-4 block <?= $customer->needsReview ? 'border-yellow-300 dark:border-yellow-700' : '' ?>">
                 <div class="flex items-start justify-between">
                     <div>
                         <div class="flex items-center gap-2">

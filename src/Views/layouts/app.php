@@ -6,6 +6,7 @@
     <title><?= e($title ?? 'FastClient') ?> - FastClient CRM</title>
     <link rel="stylesheet" href="/assets/css/app.css">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx-ext-preload@2.1.0/preload.js"></script>
     <meta name="csrf-token" content="<?= csrf_token() ?>">
     <script>
         if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -13,7 +14,7 @@
         }
     </script>
 </head>
-<body class="h-full dark:bg-warm-950" hx-headers='{"X-CSRF-TOKEN": "<?= csrf_token() ?>"}'>
+<body class="h-full dark:bg-warm-950" hx-ext="preload" hx-headers='{"X-CSRF-TOKEN": "<?= csrf_token() ?>"}'>
     <div class="min-h-full flex">
         <!-- Sidebar overlay for mobile -->
         <div id="sidebar-overlay" class="fixed inset-0 bg-gray-600 bg-opacity-75 dark:bg-warm-950 dark:bg-opacity-75 z-20 hidden lg:hidden"></div>

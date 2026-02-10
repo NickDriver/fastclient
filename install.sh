@@ -202,6 +202,10 @@ install_php() {
 install_bun() {
     print_step 2 "Installing Bun..."
 
+    # Always ensure bun is in PATH (needed for both fresh install and existing)
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$BUN_INSTALL/bin:$PATH"
+
     if check_command bun; then
         local bun_version
         bun_version=$(bun --version)
@@ -210,14 +214,15 @@ install_bun() {
         print_info "Downloading Bun installer..."
         curl -fsSL https://bun.sh/install | bash >/dev/null 2>&1
 
-        # Source bun for current session
-        export BUN_INSTALL="$HOME/.bun"
-        export PATH="$BUN_INSTALL/bin:$PATH"
-
-        # Also add to root's profile
+        # Also add to root's profile for future sessions
         if ! grep -q "BUN_INSTALL" ~/.bashrc 2>/dev/null; then
             echo 'export BUN_INSTALL="$HOME/.bun"' >> ~/.bashrc
             echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> ~/.bashrc
+        fi
+
+        if ! check_command bun; then
+            print_error "Bun installation failed"
+            exit 1
         fi
 
         local bun_version
@@ -455,11 +460,17 @@ install_dependencies() {
     cd "$INSTALL_PATH"
 
     print_info "Running bun install..."
-    bun install >/dev/null 2>&1
+    if ! bun install; then
+        print_error "Failed to install dependencies"
+        exit 1
+    fi
     print_success "Dependencies installed"
 
-    print_info "Building assets..."
-    bun run build >/dev/null 2>&1
+    print_info "Building assets (this may take a moment)..."
+    if ! bun run build; then
+        print_error "Failed to build assets"
+        exit 1
+    fi
     print_success "Assets built successfully"
 
     # Verify assets exist

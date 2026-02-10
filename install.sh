@@ -248,6 +248,19 @@ install_bun() {
         bun_version=$("$BUN_BIN" --version)
         print_success "Bun $bun_version installed to $BUN_BIN"
     fi
+
+    # Ensure bun and bunx are available system-wide in PATH
+    local bun_dir
+    bun_dir=$(dirname "$BUN_BIN")
+
+    if [ "$bun_dir" != "/usr/local/bin" ]; then
+        print_info "Creating system-wide symlinks..."
+        ln -sf "$BUN_BIN" /usr/local/bin/bun
+        if [ -x "$bun_dir/bunx" ]; then
+            ln -sf "$bun_dir/bunx" /usr/local/bin/bunx
+        fi
+        print_success "Symlinks created in /usr/local/bin"
+    fi
 }
 
 # ----------------------------------------------------------------------------

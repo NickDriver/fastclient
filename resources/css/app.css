@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-warm-50: oklch(0.98 0.01 60);
+  --color-warm-100: oklch(0.94 0.01 60);
+  --color-warm-200: oklch(0.88 0.02 55);
+  --color-warm-300: oklch(0.78 0.02 55);
+  --color-warm-400: oklch(0.62 0.03 50);
+  --color-warm-500: oklch(0.50 0.03 45);
+  --color-warm-600: oklch(0.40 0.03 45);
+  --color-warm-700: oklch(0.32 0.02 45);
+  --color-warm-800: oklch(0.25 0.02 45);
+  --color-warm-900: oklch(0.18 0.02 45);
+  --color-warm-950: oklch(0.12 0.01 45);
+}
+
 /* Custom component styles */
 @layer components {
   .btn {
@@ -11,7 +27,7 @@
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500;
+    @apply bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500 dark:bg-warm-700 dark:text-warm-200 dark:hover:bg-warm-600;
   }
 
   .btn-danger {
@@ -27,23 +43,23 @@
   }
 
   .form-input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-warm-800 dark:border-warm-600 dark:text-warm-100 dark:placeholder-warm-400;
   }
 
   .form-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+    @apply block text-sm font-medium text-gray-700 mb-1 dark:text-warm-200;
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-100;
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 dark:bg-warm-800 dark:border-warm-700;
   }
 
   .sidebar-link {
-    @apply flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors duration-200;
+    @apply flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors duration-200 dark:text-warm-300 dark:hover:bg-warm-700 dark:hover:text-warm-100;
   }
 
   .sidebar-link-active {
-    @apply bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800;
+    @apply bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/40 dark:hover:text-blue-200;
   }
 
   /* Status badges */
@@ -52,19 +68,19 @@
   }
 
   .badge-new {
-    @apply bg-green-100 text-green-800;
+    @apply bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300;
   }
 
   .badge-contacted {
-    @apply bg-blue-100 text-blue-800;
+    @apply bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300;
   }
 
   .badge-callback {
-    @apply bg-yellow-100 text-yellow-800;
+    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300;
   }
 
   .badge-follow_up {
-    @apply bg-purple-100 text-purple-800;
+    @apply bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300;
   }
 }
 

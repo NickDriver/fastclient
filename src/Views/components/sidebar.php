@@ -2,10 +2,10 @@
 $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $user = auth();
 ?>
-<aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:flex lg:flex-col bg-white border-r border-gray-200">
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:flex lg:flex-col bg-white border-r border-gray-200 dark:bg-warm-900 dark:border-warm-700">
     <!-- Logo -->
-    <div class="flex h-16 shrink-0 items-center px-6 border-b border-gray-200">
-        <a href="/dashboard" class="text-xl font-bold text-gray-900">
+    <div class="flex h-16 shrink-0 items-center px-6 border-b border-gray-200 dark:border-warm-700">
+        <a href="/dashboard" class="text-xl font-bold text-gray-900 dark:text-warm-100">
             FastClient
         </a>
     </div>
@@ -28,24 +28,35 @@ $user = auth();
     </nav>
 
     <!-- User section -->
-    <div class="border-t border-gray-200 p-4">
+    <div class="border-t border-gray-200 dark:border-warm-700 p-4">
         <div class="flex items-center gap-3">
-            <div class="h-9 w-9 rounded-full bg-gray-200 flex items-center justify-center">
-                <span class="text-sm font-medium text-gray-600">
+            <div class="h-9 w-9 rounded-full bg-gray-200 dark:bg-warm-700 flex items-center justify-center">
+                <span class="text-sm font-medium text-gray-600 dark:text-warm-300">
                     <?= e(strtoupper(substr($user?->name ?? 'U', 0, 1))) ?>
                 </span>
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate">
+                <p class="text-sm font-medium text-gray-900 dark:text-warm-100 truncate">
                     <?= e($user?->name ?? 'User') ?>
                 </p>
-                <p class="text-xs text-gray-500 truncate">
+                <p class="text-xs text-gray-500 dark:text-warm-400 truncate">
                     <?= e($user?->email ?? '') ?>
                 </p>
             </div>
+            <!-- Theme toggle -->
+            <button type="button" id="theme-toggle" class="text-gray-400 hover:text-gray-600 dark:text-warm-400 dark:hover:text-warm-200" title="Toggle theme">
+                <!-- Sun icon (visible in dark mode) -->
+                <svg class="h-5 w-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                </svg>
+                <!-- Moon icon (visible in light mode) -->
+                <svg class="h-5 w-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                </svg>
+            </button>
             <form action="/logout" method="POST" class="shrink-0">
                 <?= csrf_field() ?>
-                <button type="submit" class="text-gray-400 hover:text-gray-600" title="Logout">
+                <button type="submit" class="text-gray-400 hover:text-gray-600 dark:text-warm-400 dark:hover:text-warm-200" title="Logout">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
                     </svg>

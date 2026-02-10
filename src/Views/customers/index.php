@@ -8,8 +8,8 @@ ob_start();
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Customers</h1>
-            <p class="mt-1 text-sm text-gray-500"><?= $pagination['total'] ?> total customers</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-warm-100">Customers</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-warm-400"><?= $pagination['total'] ?> total customers</p>
         </div>
         <a href="/customers/create" class="btn btn-primary">
             <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

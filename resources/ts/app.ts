@@ -3,6 +3,18 @@
 // HTMX is loaded via CDN, declare it globally
 declare const htmx: any;
 
+// Theme toggle
+document.addEventListener('DOMContentLoaded', () => {
+  const themeToggle = document.getElementById('theme-toggle');
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  }
+});
+
 // Mobile sidebar toggle
 document.addEventListener('DOMContentLoaded', () => {
   const sidebarToggle = document.getElementById('sidebar-toggle');

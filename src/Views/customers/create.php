@@ -10,13 +10,13 @@ ob_start();
 
 <div class="space-y-6">
     <div>
-        <a href="/customers" class="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
+        <a href="/customers" class="text-sm text-gray-500 hover:text-gray-700 dark:text-warm-400 dark:hover:text-warm-200 flex items-center gap-1">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
             Back to Customers
         </a>
-        <h1 class="mt-2 text-2xl font-bold text-gray-900">Add Customer</h1>
+        <h1 class="mt-2 text-2xl font-bold text-gray-900 dark:text-warm-100">Add Customer</h1>
     </div>
 
     <div class="card p-6">
@@ -123,7 +123,7 @@ ob_start();
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 pt-4 border-t">
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-warm-700">
                 <a href="/customers" class="btn btn-secondary">Cancel</a>
                 <button type="submit" class="btn btn-primary">Create Customer</button>
             </div>

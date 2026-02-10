@@ -1,0 +1,20 @@
+server {
+    listen 80;
+    server_name {{DOMAIN}};
+    root {{PROJECT_PATH}}/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(env|git) {
+        deny all;
+    }
+}

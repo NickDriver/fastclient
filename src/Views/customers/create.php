@@ -112,6 +112,18 @@ ob_start();
                 </div>
 
                 <div>
+                    <label for="industry" class="form-label">Industry</label>
+                    <input
+                        type="text"
+                        name="industry"
+                        id="industry"
+                        value="<?= old('industry') ?>"
+                        class="form-input"
+                        placeholder="e.g. Technology, Healthcare, Finance"
+                    >
+                </div>
+
+                <div>
                     <label for="status" class="form-label">Status</label>
                     <select name="status" id="status" class="form-input">
                         <?php foreach (Customer::STATUSES as $value => $label): ?>

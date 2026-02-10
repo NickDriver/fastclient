@@ -1,7 +1,9 @@
 <?php
 use App\Models\Customer;
+use App\Models\CustomerNote;
 
 $title = $customer->name;
+$notes = CustomerNote::findByCustomerId($customer->id);
 ob_start();
 ?>
 
@@ -16,6 +18,14 @@ ob_start();
         <div class="mt-2 flex items-center gap-3">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-warm-100"><?= e($customer->name) ?></h1>
             <span class="badge badge-<?= $customer->status ?>"><?= e($customer->getStatusLabel()) ?></span>
+            <?php if ($customer->needsReview): ?>
+                <span class="badge bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300" title="<?= e($customer->reviewReason ?? 'Needs review') ?>">
+                    <svg class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                    Needs Review
+                </span>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -57,6 +67,13 @@ ob_start();
                 <dd class="mt-1 text-sm text-gray-900 dark:text-warm-100"><?= e($customer->city) ?>, <?= e($customer->state) ?></dd>
             </div>
 
+            <?php if ($customer->industry): ?>
+            <div>
+                <dt class="text-sm font-medium text-gray-500 dark:text-warm-400">Industry</dt>
+                <dd class="mt-1 text-sm text-gray-900 dark:text-warm-100"><?= e($customer->industry) ?></dd>
+            </div>
+            <?php endif; ?>
+
             <div>
                 <dt class="text-sm font-medium text-gray-500 dark:text-warm-400">Created</dt>
                 <dd class="mt-1 text-sm text-gray-900 dark:text-warm-100"><?= date('M j, Y g:i A', strtotime($customer->created_at)) ?></dd>
@@ -89,6 +106,19 @@ ob_start();
                     Delete Customer
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="card p-6">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-warm-100 mb-4">
+            <svg class="h-5 w-5 inline-block mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+            </svg>
+            Notes
+        </h2>
+        <div id="customer-notes">
+            <?php require __DIR__ . '/partials/notes.php'; ?>
         </div>
     </div>
 </div>

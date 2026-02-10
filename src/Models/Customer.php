@@ -16,7 +16,10 @@ class Customer
     public string $email;
     public string $city;
     public string $state;
+    public ?string $industry = null;
     public string $status;
+    public bool $needsReview = false;
+    public ?string $reviewReason = null;
     public string $created_at;
     public string $updated_at;
 
@@ -32,7 +35,7 @@ class Customer
         self::STATUS_FOLLOW_UP => 'Follow Up',
     ];
 
-    public static function all(array $filters = [], int $page = 1, int $perPage = 10): array
+    public static function all(array $filters = [], int $page = 1, int $perPage = 10, string $sort = 'created_at', string $direction = 'desc'): array
     {
         $pdo = Connection::getInstance();
 
@@ -45,12 +48,17 @@ class Customer
         }
 
         if (!empty($filters['search'])) {
-            $where[] = "(name ILIKE :search OR email ILIKE :search OR phone ILIKE :search OR city ILIKE :search)";
+            $where[] = "(name ILIKE :search OR email ILIKE :search OR phone ILIKE :search OR city ILIKE :search OR industry ILIKE :search)";
             $params['search'] = '%' . $filters['search'] . '%';
         }
 
         $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
         $offset = ($page - 1) * $perPage;
+
+        // Validate sort parameters
+        $allowedSorts = ['name', 'email', 'city', 'industry', 'status', 'created_at'];
+        $sort = in_array($sort, $allowedSorts) ? $sort : 'created_at';
+        $direction = strtolower($direction) === 'asc' ? 'ASC' : 'DESC';
 
         // Get total count
         $countStmt = $pdo->prepare("SELECT COUNT(*) FROM customers {$whereClause}");
@@ -58,7 +66,7 @@ class Customer
         $total = (int) $countStmt->fetchColumn();
 
         // Get customers
-        $sql = "SELECT * FROM customers {$whereClause} ORDER BY created_at DESC LIMIT :limit OFFSET :offset";
+        $sql = "SELECT * FROM customers {$whereClause} ORDER BY {$sort} {$direction} LIMIT :limit OFFSET :offset";
         $stmt = $pdo->prepare($sql);
 
         foreach ($params as $key => $value) {
@@ -97,8 +105,8 @@ class Customer
     {
         $pdo = Connection::getInstance();
         $stmt = $pdo->prepare("
-            INSERT INTO customers (name, website, phone, email, city, state, status)
-            VALUES (:name, :website, :phone, :email, :city, :state, :status)
+            INSERT INTO customers (name, website, phone, email, city, state, industry, status, needs_review, review_reason)
+            VALUES (:name, :website, :phone, :email, :city, :state, :industry, :status, :needs_review, :review_reason)
             RETURNING *
         ");
 
@@ -109,7 +117,10 @@ class Customer
             'email' => $data['email'],
             'city' => $data['city'],
             'state' => $data['state'],
+            'industry' => $data['industry'] ?? null,
             'status' => $data['status'] ?? self::STATUS_NEW,
+            'needs_review' => $data['needs_review'] ?? false,
+            'review_reason' => $data['review_reason'] ?? null,
         ]);
 
         return self::hydrate($stmt->fetch());
@@ -126,7 +137,10 @@ class Customer
                 email = :email,
                 city = :city,
                 state = :state,
+                industry = :industry,
                 status = :status,
+                needs_review = :needs_review,
+                review_reason = :review_reason,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = :id
             RETURNING *
@@ -140,7 +154,10 @@ class Customer
             'email' => $data['email'] ?? $this->email,
             'city' => $data['city'] ?? $this->city,
             'state' => $data['state'] ?? $this->state,
+            'industry' => $data['industry'] ?? $this->industry,
             'status' => $data['status'] ?? $this->status,
+            'needs_review' => $data['needs_review'] ?? $this->needsReview,
+            'review_reason' => $data['review_reason'] ?? $this->reviewReason,
         ]);
 
         return self::hydrate($stmt->fetch());
@@ -210,10 +227,42 @@ class Customer
         $customer->email = $data['email'];
         $customer->city = $data['city'];
         $customer->state = $data['state'];
+        $customer->industry = $data['industry'] ?? null;
         $customer->status = $data['status'];
+        $customer->needsReview = (bool) ($data['needs_review'] ?? false);
+        $customer->reviewReason = $data['review_reason'] ?? null;
         $customer->created_at = $data['created_at'];
         $customer->updated_at = $data['updated_at'];
 
         return $customer;
+    }
+
+    public static function findByEmail(string $email): ?self
+    {
+        $pdo = Connection::getInstance();
+        $stmt = $pdo->prepare("SELECT * FROM customers WHERE email = ?");
+        $stmt->execute([$email]);
+
+        $data = $stmt->fetch();
+        if (!$data) {
+            return null;
+        }
+
+        return self::hydrate($data);
+    }
+
+    public function clearReviewFlag(): self
+    {
+        $pdo = Connection::getInstance();
+        $stmt = $pdo->prepare("
+            UPDATE customers
+            SET needs_review = FALSE, review_reason = NULL, updated_at = CURRENT_TIMESTAMP
+            WHERE id = :id
+            RETURNING *
+        ");
+
+        $stmt->execute(['id' => $this->id]);
+
+        return self::hydrate($stmt->fetch());
     }
 }

@@ -201,7 +201,7 @@ class CustomerController
         }
 
         // Read header row
-        $headers = fgetcsv($handle);
+        $headers = fgetcsv($handle, 0, ",", "\"", "");
         if (!$headers) {
             fclose($handle);
             flash('error', 'CSV file is empty or invalid.');
@@ -225,7 +225,7 @@ class CustomerController
         $errors = [];
         $rowNum = 1;
 
-        while (($row = fgetcsv($handle)) !== false) {
+        while (($row = fgetcsv($handle, 0, ",", "\"", "")) !== false) {
             $rowNum++;
 
             // Skip empty rows

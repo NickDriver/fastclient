@@ -69,7 +69,7 @@ ask_password() {
     local result
 
     read -rsp "  $prompt: " result
-    echo ""
+    echo "" >&2  # newline to stderr so it's not captured
     echo "$result"
 }
 
@@ -409,11 +409,11 @@ configure_application() {
     echo -e "  APP_DEBUG:    ${GREEN}false${NC}"
     echo -e "  APP_URL:      ${GREEN}https://$DOMAIN${NC}"
     echo -e "  ─────────────────────────────────────"
-    echo -e "  DB_HOST:      ${GREEN}${DB_HOST:-<socket>}${NC}"
-    echo -e "  DB_PORT:      ${GREEN}${DB_PORT:-<socket>}${NC}"
+    echo -e "  DB_HOST:      ${GREEN}$DB_HOST${NC}"
+    echo -e "  DB_PORT:      ${GREEN}$DB_PORT${NC}"
     echo -e "  DB_DATABASE:  ${GREEN}$DB_DATABASE${NC}"
     echo -e "  DB_USERNAME:  ${GREEN}$DB_USERNAME${NC}"
-    echo -e "  DB_PASSWORD:  ${GREEN}${DB_PASSWORD:+********}${DB_PASSWORD:-<none>}${NC}"
+    echo -e "  DB_PASSWORD:  ${GREEN}$([ -n "$DB_PASSWORD" ] && echo '********' || echo '<none>')${NC}"
     echo -e "  ─────────────────────────────────────"
     echo ""
 

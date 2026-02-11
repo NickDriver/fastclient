@@ -172,7 +172,23 @@ class CustomerController
         $customer = $customer->updateStatus($status);
 
         if ($this->isHtmxRequest()) {
-            return view('customers.partials.status-badge', ['customer' => $customer]);
+            header('HX-Trigger: statusChanged');
+
+            // Main response: desktop badge
+            $badge = view('customers.partials.status-badge', ['customer' => $customer]);
+
+            // OOB: mobile badge
+            $mobileBadge = '<div id="status-mobile-' . $customer->id . '" hx-swap-oob="innerHTML">'
+                . view('customers.partials.status-badge', ['customer' => $customer])
+                . '</div>';
+
+            // OOB: status cards with updated counts
+            $statusCards = view('customers.partials.status-cards-oob', [
+                'statusCounts' => Customer::countByStatus(),
+                'totalCustomers' => Customer::totalCount(),
+            ]);
+
+            return $badge . $mobileBadge . $statusCards;
         }
 
         redirect('/customers');

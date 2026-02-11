@@ -34,7 +34,9 @@ ob_start();
     </div>
 
     <!-- Status cards -->
-    <?php require __DIR__ . '/partials/status-cards.php'; ?>
+    <div id="status-cards">
+        <?php require __DIR__ . '/partials/status-cards.php'; ?>
+    </div>
 
     <!-- Filters -->
     <div class="card p-4">
@@ -81,7 +83,7 @@ ob_start();
         'direction' => $direction ?? 'desc',
     ]);
     ?>
-    <div id="customer-list" hx-trigger="customerDeleted from:body" hx-get="/customers?<?= http_build_query($refreshParams) ?>">
+    <div id="customer-list" hx-trigger="customerDeleted from:body, statusChanged from:body" hx-get="/customers?<?= http_build_query($refreshParams) ?>">
         <?php require __DIR__ . '/partials/list.php'; ?>
     </div>
 </div>

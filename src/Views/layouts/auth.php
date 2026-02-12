@@ -22,7 +22,12 @@
             </h2>
         </div>
 
-        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
+            <p class="mb-4 px-4 sm:px-0 text-center text-sm italic text-amber-700 dark:text-amber-400">
+                Heads up — FastClient is currently in early beta. You're welcome to explore,
+                but please be aware that stored data may be wiped as we continue development.
+                Use at your own discretion.
+            </p>
             <div class="bg-white dark:bg-warm-800 py-8 px-4 shadow-lg sm:rounded-xl sm:px-10">
                 <!-- Flash messages -->
                 <?php if ($success = flash('success')): ?>

@@ -156,7 +156,7 @@ class Customer
             'state' => $data['state'] ?? $this->state,
             'industry' => $data['industry'] ?? $this->industry,
             'status' => $data['status'] ?? $this->status,
-            'needs_review' => $data['needs_review'] ?? $this->needsReview,
+            'needs_review' => !empty($data['needs_review'] ?? $this->needsReview) ? 1 : 0,
             'review_reason' => $data['review_reason'] ?? $this->reviewReason,
         ]);
 

@@ -32,6 +32,7 @@ $router->group('', function (Router $router) {
     $router->get('/customers/import', [CustomerController::class, 'import']);
     $router->post('/customers/import', [CustomerController::class, 'processImport']);
     $router->get('/customers/create', [CustomerController::class, 'create']);
+    $router->post('/customers/scrape', [CustomerController::class, 'scrape']);
     $router->post('/customers', [CustomerController::class, 'store']);
     $router->get('/customers/{id}', [CustomerController::class, 'show']);
     $router->get('/customers/{id}/edit', [CustomerController::class, 'edit']);

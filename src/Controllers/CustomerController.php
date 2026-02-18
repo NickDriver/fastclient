@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Models\Customer;
+use App\Services\WebScraper;
 
 class CustomerController
 {
@@ -192,6 +193,29 @@ class CustomerController
         }
 
         redirect('/customers');
+    }
+
+    public function scrape(): string
+    {
+        header('Content-Type: application/json');
+
+        if (!verify_csrf()) {
+            http_response_code(403);
+            return json_encode(['success' => false, 'error' => 'Invalid CSRF token.']);
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $url = trim($input['url'] ?? '');
+
+        if ($url === '') {
+            http_response_code(400);
+            return json_encode(['success' => false, 'error' => 'Please enter a website URL first.']);
+        }
+
+        $scraper = new WebScraper();
+        $result = $scraper->scrape($url);
+
+        return json_encode($result);
     }
 
     public function import(): string

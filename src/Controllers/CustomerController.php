@@ -204,18 +204,22 @@ class CustomerController
             return json_encode(['success' => false, 'error' => 'Invalid CSRF token.']);
         }
 
-        $input = json_decode(file_get_contents('php://input'), true);
-        $url = trim($input['url'] ?? '');
+        $input = json_decode(file_get_contents('php://input') ?: '', true);
+        $url = trim(is_array($input) ? ($input['url'] ?? '') : '');
 
         if ($url === '') {
             http_response_code(400);
             return json_encode(['success' => false, 'error' => 'Please enter a website URL first.']);
         }
 
-        $scraper = new WebScraper();
-        $result = $scraper->scrape($url);
-
-        return json_encode($result);
+        try {
+            $scraper = new WebScraper();
+            $result = $scraper->scrape($url);
+            return json_encode($result);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            return json_encode(['success' => false, 'error' => 'An error occurred while scraping the website.']);
+        }
     }
 
     public function import(): string

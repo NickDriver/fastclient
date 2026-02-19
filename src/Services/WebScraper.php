@@ -8,7 +8,12 @@ class WebScraper
 {
     private const TIMEOUT = 10;
     private const MAX_SIZE = 2 * 1024 * 1024; // 2MB
-    private const USER_AGENT = 'Mozilla/5.0 (compatible; FastClient CRM/1.0)';
+    private const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+
+    private const CONTACT_PATHS = [
+        '/contact', '/contact-us', '/contactus',
+        '/about', '/about-us', '/aboutus',
+    ];
 
     private const PRIVATE_RANGES = [
         '10.0.0.0/8',
@@ -117,7 +122,98 @@ class WebScraper
 
         $data = $this->extract($html);
 
+        // Find contact/about page links in homepage HTML, then try common paths as fallback
+        $needed = array_diff(['name', 'email', 'phone', 'city', 'state', 'industry'], array_keys($data));
+        if (!empty($needed)) {
+            $baseUrl = $this->getBaseUrl($url);
+            $contactUrls = $this->findContactLinks($html, $baseUrl);
+
+            // Add common paths that aren't already discovered
+            foreach (self::CONTACT_PATHS as $path) {
+                $candidate = rtrim($baseUrl, '/') . $path;
+                if (!in_array($candidate, $contactUrls, true)) {
+                    $contactUrls[] = $candidate;
+                }
+            }
+
+            foreach ($contactUrls as $contactUrl) {
+                $contactHtml = $this->fetch($contactUrl);
+                if ($contactHtml === null) {
+                    continue;
+                }
+
+                $subData = $this->extract($contactHtml);
+
+                // Merge only missing fields
+                foreach ($needed as $field) {
+                    if (!empty($subData[$field]) && empty($data[$field])) {
+                        $data[$field] = $subData[$field];
+                    }
+                }
+
+                $needed = array_diff(['name', 'email', 'phone', 'city', 'state', 'industry'], array_keys($data));
+                if (empty($needed)) {
+                    break;
+                }
+            }
+        }
+
         return ['success' => true, 'data' => $data];
+    }
+
+    private function getBaseUrl(string $url): string
+    {
+        $parts = parse_url($url);
+        return ($parts['scheme'] ?? 'https') . '://' . ($parts['host'] ?? '');
+    }
+
+    /**
+     * Find links to contact/about pages in the HTML.
+     * @return string[]
+     */
+    private function findContactLinks(string $html, string $baseUrl): array
+    {
+        libxml_use_internal_errors(true);
+        $doc = new \DOMDocument();
+        $doc->loadHTML('<?xml encoding="UTF-8"?>' . $html, LIBXML_NOERROR);
+        $xpath = new \DOMXPath($doc);
+        libxml_clear_errors();
+
+        $contactKeywords = ['contact', 'about', 'about-us', 'contact-us', 'reach-us', 'get-in-touch', 'locations'];
+        $found = [];
+
+        $links = $xpath->query('//a[@href]');
+        for ($i = 0; $i < $links->length; $i++) {
+            $href = $links->item($i)->getAttribute('href');
+            $text = strtolower(trim($links->item($i)->textContent));
+
+            // Check if link text or href suggests a contact/about page
+            $isContact = false;
+            foreach ($contactKeywords as $keyword) {
+                if (str_contains($text, $keyword) || str_contains(strtolower($href), $keyword)) {
+                    $isContact = true;
+                    break;
+                }
+            }
+
+            if (!$isContact) {
+                continue;
+            }
+
+            // Resolve relative URLs
+            if (str_starts_with($href, '/')) {
+                $href = rtrim($baseUrl, '/') . $href;
+            } elseif (!str_starts_with($href, 'http')) {
+                $href = rtrim($baseUrl, '/') . '/' . $href;
+            }
+
+            // Only follow same-host links
+            if (parse_url($href, PHP_URL_HOST) === parse_url($baseUrl, PHP_URL_HOST)) {
+                $found[] = $href;
+            }
+        }
+
+        return array_unique($found);
     }
 
     private function normalizeUrl(string $url): string
@@ -259,7 +355,7 @@ class WebScraper
         // Suppress HTML parsing errors
         libxml_use_internal_errors(true);
         $doc = new \DOMDocument();
-        $doc->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR);
+        $doc->loadHTML('<?xml encoding="UTF-8"?>' . $html, LIBXML_NOERROR);
         $xpath = new \DOMXPath($doc);
         libxml_clear_errors();
 
@@ -280,6 +376,17 @@ class WebScraper
         if (empty($data['phone'])) {
             $data['phone'] = $this->extractTelLink($xpath)
                 ?? $this->extractPhoneRegex($html);
+        }
+
+        // City/State fallback: address regex on page text
+        if (empty($data['city']) || empty($data['state'])) {
+            $addressData = $this->extractAddressRegex($html);
+            if (!empty($addressData['city']) && empty($data['city'])) {
+                $data['city'] = $addressData['city'];
+            }
+            if (!empty($addressData['state']) && empty($data['state'])) {
+                $data['state'] = $addressData['state'];
+            }
         }
 
         // Industry fallback: meta keywords
@@ -438,6 +545,64 @@ class WebScraper
         }
 
         return null;
+    }
+
+    private const US_STATES = [
+        'AL' => 'Alabama', 'AK' => 'Alaska', 'AZ' => 'Arizona', 'AR' => 'Arkansas',
+        'CA' => 'California', 'CO' => 'Colorado', 'CT' => 'Connecticut', 'DE' => 'Delaware',
+        'FL' => 'Florida', 'GA' => 'Georgia', 'HI' => 'Hawaii', 'ID' => 'Idaho',
+        'IL' => 'Illinois', 'IN' => 'Indiana', 'IA' => 'Iowa', 'KS' => 'Kansas',
+        'KY' => 'Kentucky', 'LA' => 'Louisiana', 'ME' => 'Maine', 'MD' => 'Maryland',
+        'MA' => 'Massachusetts', 'MI' => 'Michigan', 'MN' => 'Minnesota', 'MS' => 'Mississippi',
+        'MO' => 'Missouri', 'MT' => 'Montana', 'NE' => 'Nebraska', 'NV' => 'Nevada',
+        'NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico', 'NY' => 'New York',
+        'NC' => 'North Carolina', 'ND' => 'North Dakota', 'OH' => 'Ohio', 'OK' => 'Oklahoma',
+        'OR' => 'Oregon', 'PA' => 'Pennsylvania', 'RI' => 'Rhode Island', 'SC' => 'South Carolina',
+        'SD' => 'South Dakota', 'TN' => 'Tennessee', 'TX' => 'Texas', 'UT' => 'Utah',
+        'VT' => 'Vermont', 'VA' => 'Virginia', 'WA' => 'Washington', 'WV' => 'West Virginia',
+        'WI' => 'Wisconsin', 'WY' => 'Wyoming', 'DC' => 'District of Columbia',
+    ];
+
+    /**
+     * @return array{city?: string, state?: string}
+     */
+    private function extractAddressRegex(string $html): array
+    {
+        // Strip scripts and styles
+        $clean = preg_replace('#<(script|style)[^>]*>.*?</\1>#si', '', $html);
+        $clean = strip_tags($clean);
+        $clean = html_entity_decode($clean, ENT_QUOTES, 'UTF-8');
+
+        // Build state abbreviation pattern
+        $stateAbbrevs = implode('|', array_keys(self::US_STATES));
+        $stateNames = implode('|', array_map(fn($s) => preg_quote($s, '/'), array_values(self::US_STATES)));
+
+        // Match "City, ST ZIP" or "City, ST" or "City, State Name"
+        $patterns = [
+            // City, ST 12345
+            '/([A-Z][a-zA-Z\s\.\-]{1,30}),\s*(' . $stateAbbrevs . ')[\s,]+\d{5}/',
+            // City, ST
+            '/([A-Z][a-zA-Z\s\.\-]{1,30}),\s*(' . $stateAbbrevs . ')\b/',
+            // City, State Name
+            '/([A-Z][a-zA-Z\s\.\-]{1,30}),\s*(' . $stateNames . ')\b/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $clean, $match)) {
+                $city = trim($match[1]);
+                $state = trim($match[2]);
+
+                // Normalize state to abbreviation
+                if (strlen($state) > 2) {
+                    $flipped = array_flip(array_map('strtolower', self::US_STATES));
+                    $state = $flipped[strtolower($state)] ?? $state;
+                }
+
+                return ['city' => $city, 'state' => $state];
+            }
+        }
+
+        return [];
     }
 
     private function extractIndustryFromKeywords(\DOMXPath $xpath, string $html): ?string

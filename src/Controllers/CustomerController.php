@@ -217,13 +217,12 @@ class CustomerController
             $result = $scraper->scrape($url);
             return json_encode($result);
         } catch (\Throwable $e) {
-            error_log('WebScraper error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
             http_response_code(500);
-            $error = 'An error occurred while scraping the website.';
-            $config = require __DIR__ . '/../../config/app.php';
-            if ($config['debug']) {
-                $error .= ' ' . $e->getMessage();
-            }
+            $msg = $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine();
+            file_put_contents('/tmp/scraper-error.log', date('Y-m-d H:i:s') . ' ' . $msg . "\n", FILE_APPEND);
+            $error = config('app.debug')
+                ? 'Scraper error: ' . $e->getMessage()
+                : 'An error occurred while scraping the website.';
             return json_encode(['success' => false, 'error' => $error]);
         }
     }

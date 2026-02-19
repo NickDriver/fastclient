@@ -70,14 +70,13 @@ ob_start();
                 </div>
 
                 <div>
-                    <label for="email" class="form-label">Email *</label>
+                    <label for="email" class="form-label">Email</label>
                     <input
                         type="email"
                         name="email"
                         id="email"
                         value="<?= old('email') ?>"
                         class="form-input <?= isset($errors['email']) ? 'border-red-500' : '' ?>"
-                        required
                     >
                     <?php if (isset($errors['email'])): ?>
                         <p class="mt-1 text-sm text-red-600"><?= e($errors['email']) ?></p>

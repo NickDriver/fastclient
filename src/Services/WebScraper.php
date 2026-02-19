@@ -279,9 +279,9 @@ class WebScraper
 
     private function fetch(string $url): ?string
     {
-        $ch = curl_init();
+        $ch = \curl_init();
 
-        curl_setopt_array($ch, [
+        \curl_setopt_array($ch, [
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
@@ -299,7 +299,7 @@ class WebScraper
 
         // Limit download size
         $data = '';
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$data) {
+        \curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$data) {
             $data .= $chunk;
             if (strlen($data) > self::MAX_SIZE) {
                 return 0; // Abort
@@ -307,9 +307,9 @@ class WebScraper
             return strlen($chunk);
         });
 
-        curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        \curl_exec($ch);
+        $httpCode = \curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        \curl_close($ch);
 
         if ($httpCode < 200 || $httpCode >= 400 || empty($data)) {
             return null;
